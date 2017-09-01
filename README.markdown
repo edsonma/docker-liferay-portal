@@ -20,6 +20,7 @@ These are the supported Database Management System (*DBMS*):
   - HSQL
   - MySQL
   - PostgreSQL
+  - Oracle 12c (through this [Oracle Driver](https://github.com/amusarra/liferay-portal-database-all-in-one-support))
 
 ## Supported Application Servers
 These are the supported App servers:
@@ -33,13 +34,14 @@ The convention for branch names, using `-` as separator, is:
   - Application server: `tomcat`
   - DBMS: `hsql`
 
-So, if you are using Liferay 7 GA4 with MySQL or PostgreSQL, you should use the `7-ce-ga4-tomcat-mysql` or `7-ce-ga4-tomcat-postgres` branches, respectively.
+So, if you are using Liferay 7 GA4 with MySQL or PostgreSQL or Oracle, you should use the `7-ce-ga4-tomcat-mysql` or `7-ce-ga4-tomcat-postgres` or `7-ce-ga4-tomcat-oracle` branches, respectively.
 
 The git branches are named using the same convention, i.e.:
 
   https://github.com/mdelapenya/docker-liferay-portal/tree/7-ce-ga4-tomcat-hsql
   https://github.com/mdelapenya/docker-liferay-portal/tree/7-ce-ga4-tomcat-mysql
   https://github.com/mdelapenya/docker-liferay-portal/tree/7-ce-ga4-tomcat-postgres
+  https://github.com/mdelapenya/docker-liferay-portal/tree/7-ce-ga4-tomcat-oracle
 
 # License
 These docker images are free software ("Licensed Software"); you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
