@@ -1,29 +1,26 @@
-FROM mdelapenya/jdk:8-openjdk
+FROM mdelapenya/liferay-portal:7-ce-ga4-tomcat-hsql
 MAINTAINER Manuel de la Peña <manuel.delapenya@liferay.com>
 
-RUN apt-get update \
-  && apt-get install -y curl \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
-  && useradd -ms /bin/bash liferay
+ENV LIFERAY_ORACLE_DRIVER_VERSION=1.0.0
+ENV TOMCAT_DIR=$LIFERAY_HOME/tomcat-8.0.32
 
-ENV LIFERAY_HOME=/usr/local/liferay-ce-portal-7.0-ga4
-ENV CATALINA_HOME=$LIFERAY_HOME/tomcat-8.0.32
-ENV PATH=$CATALINA_HOME/bin:$PATH
-ENV LIFERAY_TOMCAT_URL=https://sourceforge.net/projects/lportal/files/Liferay%20Portal/7.0.3%20GA4/liferay-ce-portal-tomcat-7.0-ga4-20170613175008905.zip/download
+ENV DOCKERIZE_VERSION v0.5.0
 
-WORKDIR /usr/local
+USER root
 
-RUN mkdir -p "$LIFERAY_HOME" \
-			&& set -x \
-			&& curl -fSL "$LIFERAY_TOMCAT_URL" -o liferay-ce-portal-tomcat-7.0-ga4-20170613175008905.zip \
-			&& unzip liferay-ce-portal-tomcat-7.0-ga4-20170613175008905.zip \
-			&& rm liferay-ce-portal-tomcat-7.0-ga4-20170613175008905.zip \
-      && chown -R liferay:liferay $LIFERAY_HOME
-
-EXPOSE 8080/tcp
-EXPOSE 11311/tcp
+RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
+    && tar -C /usr/local/bin -xzvf dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
+    && rm dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz
 
 USER liferay
 
-ENTRYPOINT ["catalina.sh", "run"]
+RUN \
+  cd /tmp; \
+  wget http://central.maven.org/maven2/it/dontesta/labs/liferay/portal/db/liferay-portal-database-all-in-one-support/${LIFERAY_ORACLE_DRIVER_VERSION}/liferay-portal-database-all-in-one-support-${LIFERAY_ORACLE_DRIVER_VERSION}.jar; \
+  cp liferay-portal-database-all-in-one-support-${LIFERAY_ORACLE_DRIVER_VERSION}.jar ${TOMCAT_DIR}/webapps/ROOT/WEB-INF/lib; \
+  rm liferay-portal-database-all-in-one-support-${LIFERAY_ORACLE_DRIVER_VERSION}.jar
+
+COPY ./configs/portal-ext.properties $LIFERAY_HOME/portal-ext.properties
+COPY ./configs/ojdbc8.jar ${TOMCAT_DIR}/lib/ext
+
+ENTRYPOINT dockerize -wait tcp://oracle:1521 -wait-retry-interval 60s -timeout 60s catalina.sh run

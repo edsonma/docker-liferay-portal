@@ -1,0 +1,11 @@
+version: '2'
+services:
+  portal:
+    build: .
+    depends_on:
+     - oracle
+    ports:
+     - "8080:8080"
+     - "11311:11311"
+  oracle:
+    image: amusarra/oracle-12c-liferay
