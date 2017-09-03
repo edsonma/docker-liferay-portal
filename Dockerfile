@@ -1,5 +1,5 @@
 FROM mdelapenya/liferay-portal:7-ce-ga4-tomcat-hsql
-MAINTAINER Manuel de la Peña <manuel.delapenya@liferay.com>
+MAINTAINER Antonio Musarra <antonio.musarra@gmail.com>
 
 ENV LIFERAY_ORACLE_DRIVER_VERSION=1.0.0
 ENV TOMCAT_DIR=$LIFERAY_HOME/tomcat-8.0.32
@@ -23,4 +23,4 @@ RUN \
 COPY ./configs/portal-ext.properties $LIFERAY_HOME/portal-ext.properties
 COPY ./configs/ojdbc8.jar ${TOMCAT_DIR}/lib/ext
 
-ENTRYPOINT dockerize -wait tcp://oracle:1521 -wait-retry-interval 60s -timeout 60s catalina.sh run
+ENTRYPOINT dockerize -wait tcp://oracle:1521 -wait-retry-interval 60s -timeout 300s catalina.sh run
