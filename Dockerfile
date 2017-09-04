@@ -1,29 +1,28 @@
-FROM mdelapenya/jdk:8-openjdk
-MAINTAINER Manuel de la Peña <manuel.delapenya@liferay.com>
+FROM mdelapenya/liferay-portal:7-ce-ga4-tomcat-hsql
 
-RUN apt-get update \
-  && apt-get install -y curl \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
-  && useradd -ms /bin/bash liferay
+# Set maintainer of the docker image
+MAINTAINER Antonio Musarra <antonio.musarra@gmail.com>
+LABEL maintainer="Antonio Musarra <antonio.musarra@gmail.com>"
 
-ENV LIFERAY_HOME=/usr/local/liferay-ce-portal-7.0-ga4
-ENV CATALINA_HOME=$LIFERAY_HOME/tomcat-8.0.32
-ENV PATH=$CATALINA_HOME/bin:$PATH
-ENV LIFERAY_TOMCAT_URL=https://sourceforge.net/projects/lportal/files/Liferay%20Portal/7.0.3%20GA4/liferay-ce-portal-tomcat-7.0-ga4-20170613175008905.zip/download
+ENV WEB_SERVER_PROTOCOL=http
+ENV URL_SECURITY_MODE=ip
 
-WORKDIR /usr/local
+USER root
 
-RUN mkdir -p "$LIFERAY_HOME" \
-			&& set -x \
-			&& curl -fSL "$LIFERAY_TOMCAT_URL" -o liferay-ce-portal-tomcat-7.0-ga4-20170613175008905.zip \
-			&& unzip liferay-ce-portal-tomcat-7.0-ga4-20170613175008905.zip \
-			&& rm liferay-ce-portal-tomcat-7.0-ga4-20170613175008905.zip \
-      && chown -R liferay:liferay $LIFERAY_HOME
+RUN \
+  mkdir /deploy \
+  && chown liferay:liferay /deploy
 
-EXPOSE 8080/tcp
-EXPOSE 11311/tcp
+COPY ./configs/portal-ext.properties $LIFERAY_HOME/portal-ext.properties
+COPY ./configs/entrypoint.sh $CATALINA_HOME/bin
+
+RUN chmod +x $CATALINA_HOME/bin/entrypoint.sh
+
+RUN \
+  chown liferay:liferay $CATALINA_HOME/bin/entrypoint.sh \
+  && chown liferay:liferay $LIFERAY_HOME/portal-ext.properties
 
 USER liferay
 
-ENTRYPOINT ["catalina.sh", "run"]
+VOLUME ["/deploy"]
+ENTRYPOINT ["entrypoint.sh"]
