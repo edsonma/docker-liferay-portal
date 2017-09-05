@@ -6,12 +6,12 @@ LABEL maintainer="Antonio Musarra <antonio.musarra@gmail.com>"
 
 ENV WEB_SERVER_PROTOCOL=http
 ENV URL_SECURITY_MODE=ip
+ENV CONTAINER_DIR=/wedeploy-container
 
 USER root
 
-RUN \
-  mkdir /deploy \
-  && chown liferay:liferay /deploy
+RUN apt-get update \
+  && apt-get install tree
 
 COPY ./configs/portal-ext.properties $LIFERAY_HOME/portal-ext.properties
 COPY ./configs/entrypoint.sh $CATALINA_HOME/bin
@@ -24,5 +24,4 @@ RUN \
 
 USER liferay
 
-VOLUME ["/deploy"]
 ENTRYPOINT ["entrypoint.sh"]
