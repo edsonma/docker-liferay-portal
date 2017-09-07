@@ -9,8 +9,11 @@
 ##
 set -e
 
+LIFERAY_DATA=/opt/liferay
+
 main() {
   show_motd
+  preparing_liferay_data_directory
   check_liferay_portal_properties_configs_directory
   check_liferay_deploy_directory
   check_liferay_osgi_configs_directory
@@ -21,6 +24,51 @@ main() {
 show_motd() {
   echo "Starting Liferay 7 Community Edition GA4 instance (HSQL version)."
   echo "LIFERAY_HOME: $LIFERAY_HOME"
+  echo
+}
+
+preparing_liferay_data_directory() {
+  echo "Preparing Liferay data directory layout..."
+  echo "Checking Liferay data directory..."
+  echo
+
+  if [[ ! -d "$LIFERAY_DATA/data" ]]; then
+    echo "Checking Liferay data directory...[NOT FOUND]"
+    echo
+
+    mkdir -p /opt/liferay/data
+    mkdir -p /opt/liferay/deploy
+    mkdir -p /opt/liferay/osgi
+    mkdir -p /opt/liferay/configs
+
+    cp -a $LIFERAY_HOME/osgi/* $LIFERAY_DATA/osgi
+
+    tree -L 2 $LIFERAY_DATA
+    echo "Checking Liferay data directory...[CREATED]"
+    echo
+  fi
+
+  echo "Preparing a symlink for $LIFERAY_HOME..."
+  echo
+
+  rm -rf $LIFERAY_HOME/data
+  rm -rf $LIFERAY_HOME/deploy
+  rm -rf $LIFERAY_HOME/configs
+  rm -rf $LIFERAY_HOME/osgi
+
+  ln -s $LIFERAY_DATA/data $LIFERAY_HOME/data
+  ln -s $LIFERAY_DATA/deploy $LIFERAY_HOME/deploy
+  ln -s $LIFERAY_DATA/osgi $LIFERAY_HOME/osgi
+  ln -s $LIFERAY_DATA/configs $LIFERAY_HOME/configs
+
+  cp $LIFERAY_HOME/portal-ext.properties $LIFERAY_DATA/portal-ext.properties
+  ln -s -f $LIFERAY_DATA/portal-ext.properties $LIFERAY_HOME/portal-ext.properties
+
+  tree -L 1 $LIFERAY_HOME
+
+  echo "Preparing a symlink for $LIFERAY_HOME...[DONE]"
+  echo "Preparing Liferay data directory layout...[OK]"
+  echo "Checking Liferay data directory...[OK]"
   echo
 }
 
@@ -50,7 +98,7 @@ check_liferay_portal_properties_configs_directory() {
   else
     echo "Checking Portal portal-ext.properties file $CONTAINER_DIR/...[FOUND]"
 
-    cp -r $CONTAINER_DIR/portal-ext.properties $LIFERAY_HOME/portal-ext.properties
+    cp $CONTAINER_DIR/portal-ext.properties $LIFERAY_DATA/portal-ext.properties
 
     echo "Checking Portal portal-ext.properties file $LIFERAY_HOME/configs...[OK]"
     echo
