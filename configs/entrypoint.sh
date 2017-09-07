@@ -59,14 +59,24 @@ check_liferay_portal_properties_configs_directory() {
 
 overwrite_liferay_portal_properties_from_env() {
   echo "Applying the liferay configuration via default portal-ext.properties"
-  echo "The two environment variables are: {WEB_SERVER_PROTOCOL, URL_SECURITY_MODE}"
+  echo "The two environment variables are:
+    {
+      LIFERAY_WEB_SERVER_PROTOCOL = $LIFERAY_WEB_SERVER_PROTOCOL
+      LIFERAY_URL_SECURITY_MODE = $LIFERAY_URL_SECURITY_MODE
+      LIFERAY_PUBLISH_GOGO_SHELL = $LIFERAY_PUBLISH_GOGO_SHELL
+    }"
 
-  sed -i -e "s/web\.server\.protocol=http$/web\.server\.protocol=$WEB_SERVER_PROTOCOL/g" $LIFERAY_HOME/portal-ext.properties
-  sed -i -e "s/redirect\.url\.security\.mode=ip$/redirect\.url\.security\.mode=$URL_SECURITY_MODE/g" $LIFERAY_HOME/portal-ext.properties
+  sed -i -e "s/web\.server\.protocol=http$/web\.server\.protocol=$LIFERAY_WEB_SERVER_PROTOCOL/g" $LIFERAY_HOME/portal-ext.properties
+  sed -i -e "s/redirect\.url\.security\.mode=ip$/redirect\.url\.security\.mode=$LIFERAY_URL_SECURITY_MODE/g" $LIFERAY_HOME/portal-ext.properties
+
+  if [[ $LIFERAY_PUBLISH_GOGO_SHELL == "true" ]]; then
+    sed -i -e "s/module\.framework\.properties\.osgi\.console=localhost:11311$/module\.framework\.properties\.osgi\.console=0\.0\.0\.0:11311/g" $LIFERAY_HOME/portal-ext.properties
+  fi
 
   echo "Content of the portal-ext.properties after applying the changes."
   echo
   cat $LIFERAY_HOME/portal-ext.properties
+  echo
 }
 
 check_liferay_deploy_directory() {
