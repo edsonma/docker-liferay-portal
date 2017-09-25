@@ -61,8 +61,8 @@ preparing_liferay_data_directory() {
   ln -s $LIFERAY_DATA/osgi $LIFERAY_HOME/osgi
   ln -s $LIFERAY_DATA/configs $LIFERAY_HOME/configs
 
-  cp $LIFERAY_HOME/portal-ext.properties $LIFERAY_DATA/portal-ext.properties
-  ln -s -f $LIFERAY_DATA/portal-ext.properties $LIFERAY_HOME/portal-ext.properties
+  mv $LIFERAY_HOME/portal-ext.properties $LIFERAY_DATA/portal-ext.properties
+  ln -s $LIFERAY_DATA/portal-ext.properties $LIFERAY_HOME/portal-ext.properties
 
   tree -L 1 $LIFERAY_HOME
 
@@ -114,11 +114,11 @@ overwrite_liferay_portal_properties_from_env() {
       LIFERAY_PUBLISH_GOGO_SHELL = $LIFERAY_PUBLISH_GOGO_SHELL
     }"
 
-  sed -i -e "s/web\.server\.protocol=http$/web\.server\.protocol=$LIFERAY_WEB_SERVER_PROTOCOL/g" $LIFERAY_HOME/portal-ext.properties
-  sed -i -e "s/redirect\.url\.security\.mode=ip$/redirect\.url\.security\.mode=$LIFERAY_URL_SECURITY_MODE/g" $LIFERAY_HOME/portal-ext.properties
+  sed -i -e "s/web\.server\.protocol=http$/web\.server\.protocol=$LIFERAY_WEB_SERVER_PROTOCOL/g" $LIFERAY_DATA/portal-ext.properties
+  sed -i -e "s/redirect\.url\.security\.mode=ip$/redirect\.url\.security\.mode=$LIFERAY_URL_SECURITY_MODE/g" $LIFERAY_DATA/portal-ext.properties
 
   if [[ $LIFERAY_PUBLISH_GOGO_SHELL == "true" ]]; then
-    sed -i -e "s/module\.framework\.properties\.osgi\.console=localhost:11311$/module\.framework\.properties\.osgi\.console=0\.0\.0\.0:11311/g" $LIFERAY_HOME/portal-ext.properties
+    sed -i -e "s/module\.framework\.properties\.osgi\.console=localhost:11311$/module\.framework\.properties\.osgi\.console=0\.0\.0\.0:11311/g" $LIFERAY_DATA/portal-ext.properties
   fi
 
   echo "Content of the portal-ext.properties after applying the changes."
