@@ -100,7 +100,7 @@ check_liferay_portal_properties_configs_directory() {
 
     cp $CONTAINER_DIR/portal-ext.properties $LIFERAY_DATA/portal-ext.properties
 
-    echo "Checking Portal portal-ext.properties file $LIFERAY_HOME/configs...[OK]"
+    echo "Checking Portal portal-ext.properties file $CONTAINER_DIR/...[OK]"
     echo
   fi
 }
