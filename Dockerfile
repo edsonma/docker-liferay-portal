@@ -7,6 +7,7 @@ LABEL maintainer="Antonio Musarra <antonio.musarra@gmail.com>"
 ENV LIFERAY_WEB_SERVER_PROTOCOL=http
 ENV LIFERAY_URL_SECURITY_MODE=ip
 ENV LIFERAY_PUBLISH_GOGO_SHELL=true
+ENV LIFERAY_CLEAN_DATA_DIR=false
 ENV CONTAINER_DIR=/wedeploy-container
 
 USER root

@@ -32,6 +32,19 @@ preparing_liferay_data_directory() {
   echo "Checking Liferay data directory..."
   echo
 
+  if [[ $LIFERAY_CLEAN_DATA_DIR == "true" ]]; then
+    echo "Cleaning liferay data directory..."
+    echo
+
+    rm -rf /opt/liferay/data
+    rm -rf /opt/liferay/deploy
+    rm -rf /opt/liferay/osgi
+    rm -rf /opt/liferay/configs
+
+    echo "Cleaning liferay data directory...[OK]"
+    echo
+  fi
+
   if [[ ! -d "$LIFERAY_DATA/data" ]]; then
     echo "Checking Liferay data directory...[NOT FOUND]"
     echo
