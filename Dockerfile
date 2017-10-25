@@ -1,47 +1,32 @@
-FROM mdelapenya/jdk:8-openjdk
-MAINTAINER Manuel de la Peña <manuel.delapenya@liferay.com>
+FROM mdelapenya/liferay-portal:7-ce-ga5-tomcat-hsql
+
+# Set maintainer of the docker image
+MAINTAINER Antonio Musarra <antonio.musarra@gmail.com>
+LABEL maintainer="Antonio Musarra <antonio.musarra@gmail.com>"
+
+ENV LIFERAY_WEB_SERVER_PROTOCOL=http
+ENV LIFERAY_URL_SECURITY_MODE=ip
+ENV LIFERAY_PUBLISH_GOGO_SHELL=true
+ENV LIFERAY_CLEAN_DATA_DIR=false
+ENV CONTAINER_DIR=/wedeploy-container
+
+USER root
 
 RUN apt-get update \
-  && apt-get install -y curl tree \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
-  && useradd -ms /bin/bash liferay
+  && apt-get install tree \
+  && apt-get install telnet
 
-ENV LIFERAY_HOME=/usr/local/liferay-ce-portal-7.0-ga5
-ENV LIFERAY_SHARED=/storage/liferay
-ENV LIFERAY_WEB_SERVER_PROTOCOL=https
-ENV LIFERAY_CONFIG_DIR=/tmp/liferay/configs
-ENV LIFERAY_DEPLOY_DIR=/tmp/liferay/deploy
-ENV CATALINA_HOME=$LIFERAY_HOME/tomcat-8.0.32
-ENV PATH=$CATALINA_HOME/bin:$PATH
-ENV LIFERAY_TOMCAT_URL=https://sourceforge.net/projects/lportal/files/Liferay%20Portal/7.0.4%20GA5/liferay-ce-portal-tomcat-7.0-ga5-20171018150113838.zip/download
-ENV GOSU_VERSION 1.10
-ENV GOSU_URL=https://github.com/tianon/gosu/releases/download/$GOSU_VERSION
+COPY ./configs/portal-ext.properties $LIFERAY_HOME/portal-ext.properties
+COPY ./configs/setenv.sh $CATALINA_HOME/bin
+COPY ./entrypoint.sh $CATALINA_HOME/bin
 
-WORKDIR /usr/local
+RUN chmod +x $CATALINA_HOME/bin/entrypoint.sh
 
-RUN mkdir -p "$LIFERAY_HOME" \
-      && set -x \
-      && curl -fSL "$LIFERAY_TOMCAT_URL" -o liferay-ce-portal-tomcat-7.0-ga5-20171018150113838.zip \
-      && unzip liferay-ce-portal-tomcat-7.0-ga5-20171018150113838.zip \
-      && rm liferay-ce-portal-tomcat-7.0-ga5-20171018150113838.zip \
-      && chown -R liferay:liferay $LIFERAY_HOME \
-      && wget -O /usr/local/bin/gosu "$GOSU_URL/gosu-$(dpkg --print-architecture)" \
-      && wget -O /usr/local/bin/gosu.asc "$GOSU_URL/gosu-$(dpkg --print-architecture).asc" \
-      && export GNUPGHOME="$(mktemp -d)" \
-      && gpg --keyserver ha.pool.sks-keyservers.net --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 \
-      && gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu \
-      && rm -rf "$GNUPGHOME" /usr/local/bin/gosu.asc \
-      && chmod +x /usr/local/bin/gosu \
-      && gosu nobody true
+RUN \
+  chown liferay:liferay $CATALINA_HOME/bin/entrypoint.sh \
+  && chown liferay:liferay $LIFERAY_HOME/portal-ext.properties \
+  && mkdir -p /opt/liferay \
+  && chown liferay:liferay /opt/liferay
 
-COPY ./entrypoint.sh /usr/local/bin
-RUN chmod +x /usr/local/bin/entrypoint.sh
-
-EXPOSE 8080/tcp
-EXPOSE 11311/tcp
-
-VOLUME /storage
-
+USER liferay
 ENTRYPOINT ["entrypoint.sh"]
-CMD ["catalina.sh", "run"]

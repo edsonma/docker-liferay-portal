@@ -1,146 +1,185 @@
 #!/bin/bash
+##
+# Entrypoint scripts for starting Liferay 7 Community Edition GA 4
+# with the support for hot deploy, configs portal properties
+# and OSGi Configuration on WeDeploy.
+#
+# @author Antonio Musarra <antonio.musarra@gmail.com>
+#
+##
+set -e
 
-set -o errexit
+LIFERAY_DATA=/opt/liferay
 
 main() {
   show_motd
-  prepare_liferay_portal_properties
-  prepare_liferay_tomcat_config
-  prepare_liferay_deploy_directory
-  prepare_liferay_osgi_configs_directory
-  run_portal "$@"
+  preparing_liferay_data_directory
+  check_liferay_portal_properties_configs_directory
+  check_liferay_deploy_directory
+  check_liferay_osgi_configs_directory
+  overwrite_liferay_portal_properties_from_env
+  run
 }
 
 show_motd() {
-  echo "Starting Liferay 7 instance.
-
-  LIFERAY_HOME: $LIFERAY_HOME
-  "
+  echo "Starting Liferay 7 Community Edition GA5 instance (HSQL version)."
+  echo "LIFERAY_HOME: $LIFERAY_HOME"
+  echo
 }
 
-prepare_liferay_deploy_directory() {
-  if [ ! -f $LIFERAY_DEPLOY_DIR/* ]; then
-    echo "No deploy files found.
-  If you wish to deploy customizations to Liferay make
-  sure you include a 'deploy' directory in the root of 
-  your project.
+preparing_liferay_data_directory() {
+  echo "Preparing Liferay data directory layout..."
+  echo "Checking Liferay data directory..."
+  echo
 
-  Continuing.
-  "
-    return 0
+  if [[ $LIFERAY_CLEAN_DATA_DIR == "true" ]]; then
+    echo "Cleaning liferay data directory..."
+    echo
+
+    rm -rf /opt/liferay/data
+    rm -rf /opt/liferay/deploy
+    rm -rf /opt/liferay/osgi
+    rm -rf /opt/liferay/configs
+
+    echo "Cleaning liferay data directory...[OK]"
+    echo
   fi
 
-  echo "Deploy directory found.
-  The following contents are going to be synchronized
-  with Liferay:
-  "
-  tree $LIFERAY_DEPLOY_DIR
+  if [[ ! -d "$LIFERAY_DATA/data" ]]; then
+    echo "Checking Liferay data directory...[NOT FOUND]"
+    echo
 
-  [ -f $LIFERAY_DEPLOY_DIR/*.lpkg ] && cp $LIFERAY_DEPLOY_DIR/*.lpkg $LIFERAY_HOME/osgi/marketplace
-  [ -f $LIFERAY_DEPLOY_DIR/*.jar ] && cp $LIFERAY_DEPLOY_DIR/*.jar $LIFERAY_HOME/osgi/modules
-  [ -f $LIFERAY_DEPLOY_DIR/*.war ] && cp $LIFERAY_DEPLOY_DIR/*.war $LIFERAY_HOME/osgi/war
-  [ -f $LIFERAY_DEPLOY_DIR/*.xml ] && cp $LIFERAY_DEPLOY_DIR/*.xml $LIFERAY_HOME/deploy
+    mkdir -p /opt/liferay/data
+    mkdir -p /opt/liferay/deploy
+    mkdir -p /opt/liferay/osgi
+    mkdir -p /opt/liferay/configs
 
-  echo "
-  Continuing.
-  "
+    cp -a $LIFERAY_HOME/osgi/* $LIFERAY_DATA/osgi
+
+    tree -L 2 $LIFERAY_DATA
+    echo "Checking Liferay data directory...[CREATED]"
+    echo
+  fi
+
+  echo "Preparing a symlink for $LIFERAY_HOME..."
+  echo
+
+  rm -rf $LIFERAY_HOME/data
+  rm -rf $LIFERAY_HOME/deploy
+  rm -rf $LIFERAY_HOME/configs
+  rm -rf $LIFERAY_HOME/osgi
+
+  ln -s $LIFERAY_DATA/data $LIFERAY_HOME/data
+  ln -s $LIFERAY_DATA/deploy $LIFERAY_HOME/deploy
+  ln -s $LIFERAY_DATA/osgi $LIFERAY_HOME/osgi
+  ln -s $LIFERAY_DATA/configs $LIFERAY_HOME/configs
+
+  mv $LIFERAY_HOME/portal-ext.properties $LIFERAY_DATA/portal-ext.properties
+  ln -s $LIFERAY_DATA/portal-ext.properties $LIFERAY_HOME/portal-ext.properties
+
+  tree -L 1 $LIFERAY_HOME
+
+  echo "Preparing a symlink for $LIFERAY_HOME...[DONE]"
+  echo "Preparing Liferay data directory layout...[OK]"
+  echo "Checking Liferay data directory...[OK]"
+  echo
 }
 
-prepare_liferay_osgi_configs_directory() {
-  if [[ ! -d "$LIFERAY_CONFIG_DIR/osgi" ]]; then
-    echo "No 'configs/osgi' directory found.
-  If you wish to deploy custom OSGi configurations to
-  Liferay make sure you include a 'configs/osgi' directory
-  in the root of your project.
+check_liferay_portal_properties_configs_directory() {
+  echo "Checking Portal properties directory $CONTAINER_DIR/configs..."
 
-  Continuing.
-  "
-    return 0
+  if [[ ! -d "$CONTAINER_DIR/configs" ]]; then
+    echo "Checking Portal properties directory $CONTAINER_DIR/configs...[NOT FOUND]"
+    echo
+  else
+    echo "Checking Portal properties directory $CONTAINER_DIR/configs...[FOUND]"
+    echo "Copying Portal properties directory $LIFERAY_HOME/configs..."
+
+    tree $CONTAINER_DIR/configs
+    mkdir -p $LIFERAY_HOME/configs
+    cp -r $CONTAINER_DIR/configs/*.properties $LIFERAY_HOME/configs
+
+    echo "Copying Portal properties directory $LIFERAY_HOME/configs...[OK]"
+    echo
   fi
 
-  echo "OSGi configs directory found.
-  The following contents are going to be synchronized
-  with Liferay:
-  "
+  echo "Checking Portal portal-ext.properties file $CONTAINER_DIR..."
 
-  tree $LIFERAY_CONFIG_DIR/osgi
-  mkdir -p $LIFERAY_HOME/osgi/configs
-  cp -r $LIFERAY_CONFIG_DIR/osgi/* $LIFERAY_HOME/osgi/configs 2>/dev/null || true
+  if [[ ! -f "$CONTAINER_DIR/portal-ext.properties" ]]; then
+    echo "Checking Portal portal-ext.properties file $CONTAINER_DIR/...[NOT FOUND]"
+    echo
+  else
+    echo "Checking Portal portal-ext.properties file $CONTAINER_DIR/...[FOUND]"
 
-  echo "
-  Continuing.
-  "
+    cp $CONTAINER_DIR/portal-ext.properties $LIFERAY_DATA/portal-ext.properties
+
+    echo "Checking Portal portal-ext.properties file $CONTAINER_DIR/...[OK]"
+    echo
+  fi
 }
 
-prepare_liferay_portal_properties() {
-  if [[ ! -f "$LIFERAY_CONFIG_DIR/portal-ext.properties" ]]; then
-    echo "No 'configs/portal-ext.properties' file found.
-  If you wish to use a custom properties file make sure
-  you include a 'configs/portal-ext.properties' file in the 
-  root of your project.
+overwrite_liferay_portal_properties_from_env() {
+  echo "Applying the liferay configuration via default portal-ext.properties"
+  echo "The two environment variables are:
+    {
+      LIFERAY_WEB_SERVER_PROTOCOL = $LIFERAY_WEB_SERVER_PROTOCOL
+      LIFERAY_URL_SECURITY_MODE = $LIFERAY_URL_SECURITY_MODE
+      LIFERAY_PUBLISH_GOGO_SHELL = $LIFERAY_PUBLISH_GOGO_SHELL
+    }"
 
-  Continuing.
-  "
-    return 0
+  sed -i -e "s/web\.server\.protocol=http$/web\.server\.protocol=$LIFERAY_WEB_SERVER_PROTOCOL/g" $LIFERAY_DATA/portal-ext.properties
+  sed -i -e "s/redirect\.url\.security\.mode=ip$/redirect\.url\.security\.mode=$LIFERAY_URL_SECURITY_MODE/g" $LIFERAY_DATA/portal-ext.properties
+
+  if [[ $LIFERAY_PUBLISH_GOGO_SHELL == "true" ]]; then
+    sed -i -e "s/module\.framework\.properties\.osgi\.console=localhost:11311$/module\.framework\.properties\.osgi\.console=0\.0\.0\.0:11311/g" $LIFERAY_DATA/portal-ext.properties
   fi
 
-  echo "Portal properties (portal-ext.properties) file found.
-  "
-
-  cp -r $LIFERAY_CONFIG_DIR/portal-ext.properties $LIFERAY_HOME/portal-ext.properties
-
-  sed -i -e "s/web\.server\.protocol=https$/web\.server\.protocol=$LIFERAY_WEB_SERVER_PROTOCOL/g" $LIFERAY_HOME/portal-ext.properties
-
-  echo "
-  Continuing.
-  "
+  echo "Content of the portal-ext.properties after applying the changes."
+  echo
+  cat $LIFERAY_HOME/portal-ext.properties
+  echo
 }
 
-prepare_liferay_tomcat_config() {
-  if [[ ! -f "$LIFERAY_CONFIG_DIR/setenv.sh" ]]; then
-    echo "No 'configs/setenv.sh' file found.
-  If you wish to provide custom tomcat JVM settings, make sure
-  you include a 'configs/setenv.sh' file in the 
-  root of your project.
+check_liferay_deploy_directory() {
+  echo "Checking deploy directory $CONTAINER_DIR/deploy..."
 
-  Continuing.
-  "
-    return 0
+  if [[ ! -d "$CONTAINER_DIR/deploy" ]]; then
+    echo "Checking deploy directory $CONTAINER_DIR/deploy...[NOT FOUND]"
+    echo
+  else
+    echo "Checking deploy directory $CONTAINER_DIR/deploy...[FOUND]"
+    echo "Copying bundle to auto deploy directory $LIFERAY_HOME/deploy..."
+
+    tree $CONTAINER_DIR/deploy
+    mkdir -p $LIFERAY_HOME/deploy
+    cp -r $CONTAINER_DIR/deploy/* $LIFERAY_HOME/deploy
+
+    echo "Copying bundle to auto deploy directory $LIFERAY_HOME/deploy...[OK]"
+    echo
   fi
-
-  echo "Tomcat configuration (setenv.sh) file found.
-  "
-
-  cp -r $LIFERAY_CONFIG_DIR/setenv.sh $CATALINA_HOME/bin/setenv.sh
-
-  echo "
-  Continuing.
-  "
 }
 
-run_portal() {
+check_liferay_osgi_configs_directory() {
+  echo "Checking OSGi configuration directory $CONTAINER_DIR/osgi-configs..."
 
-  set -e
+  if [[ ! -d "$CONTAINER_DIR/osgi-configs" ]]; then
+    echo "Checking OSGi configuration directory $CONTAINER_DIR/osgi-configs...[NOT FOUND]"
+    echo
+  else
+    echo "Checking OSGi configuration directory $CONTAINER_DIR/osgi-configs...[FOUND]"
+    echo "Copying OSGi configuration to directory $LIFERAY_HOME/osgi/configs..."
 
-  # Drop root privileges if we are running liferay
-  # allow the container to be started with `--user`
-  if [ "$1" = 'catalina.sh' -a "$(id -u)" = '0' ]; then
-    # Change the ownership of Liferay Shared Volume to liferay
+    tree $CONTAINER_DIR/osgi-configs
+    mkdir -p $LIFERAY_HOME/osgi/configs
+    cp -r $CONTAINER_DIR/osgi-configs/*.{cfg,config} $LIFERAY_HOME/osgi/configs
 
-    if [[ ! -d "$LIFERAY_SHARED" ]]; then
-      mkdir -p $LIFERAY_SHARED
-    fi
-
-    chown -R liferay:liferay $LIFERAY_SHARED
-    chown -R liferay:liferay $LIFERAY_HOME
-    
-    set -- gosu liferay "$@"
+    echo "Copying OSGi configuration to directory $LIFERAY_HOME/osgi/configs...[OK]"
+    echo
   fi
+}
 
-  # As argument is not related to liferay,
-  # then assume that user wants to run his own process,
-  # for example a `bash` shell to explore this image
-  exec "$@"
+run() {
+  exec catalina.sh run
 }
 
 main "$@"
