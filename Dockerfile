@@ -29,4 +29,5 @@ RUN \
   && chown liferay:liferay /opt/liferay
 
 USER liferay
+VOLUME "/opt/liferay"
 ENTRYPOINT ["entrypoint.sh"]
