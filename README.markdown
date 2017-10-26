@@ -39,10 +39,10 @@ So, if you are using Liferay 7 GA5 with MySQL or PostgreSQL or Oracle, you shoul
 
 The git branches are named using the same convention, i.e.:
 
-  https://github.com/mdelapenya/docker-liferay-portal/tree/7-ce-ga4-tomcat-oracle
-  https://github.com/mdelapenya/docker-liferay-portal/tree/7-ce-ga5-tomcat-hsql
-  https://github.com/mdelapenya/docker-liferay-portal/tree/7-ce-ga5-tomcat-mysql
-  https://github.com/mdelapenya/docker-liferay-portal/tree/7-ce-ga5-tomcat-postgres
+1. https://github.com/amusarra/docker-liferay-portal/tree/7-ce-ga5-tomcat-oracle
+2. https://github.com/amusarra/docker-liferay-portal/tree/7-ce-ga5-tomcat-hsql
+3. https://github.com/mdelapenya/docker-liferay-portal/tree/7-ce-ga5-tomcat-mysql
+4. https://github.com/mdelapenya/docker-liferay-portal/tree/7-ce-ga5-tomcat-postgres
 
 # License
 These docker images are free software ("Licensed Software"); you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
