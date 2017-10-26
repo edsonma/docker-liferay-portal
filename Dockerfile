@@ -1,33 +1,26 @@
 FROM mdelapenya/liferay-portal:7-ce-ga5-tomcat-hsql
-
-# Set maintainer of the docker image
 MAINTAINER Antonio Musarra <antonio.musarra@gmail.com>
-LABEL maintainer="Antonio Musarra <antonio.musarra@gmail.com>"
 
-ENV LIFERAY_WEB_SERVER_PROTOCOL=http
-ENV LIFERAY_URL_SECURITY_MODE=ip
-ENV LIFERAY_PUBLISH_GOGO_SHELL=true
-ENV LIFERAY_CLEAN_DATA_DIR=false
-ENV CONTAINER_DIR=/wedeploy-container
+ENV LIFERAY_ORACLE_DRIVER_VERSION=1.0.0
+ENV TOMCAT_DIR=$LIFERAY_HOME/tomcat-8.0.32
+
+ENV DOCKERIZE_VERSION v0.5.0
 
 USER root
 
-RUN apt-get update \
-  && apt-get install tree \
-  && apt-get install telnet
-
-COPY ./configs/portal-ext.properties $LIFERAY_HOME/portal-ext.properties
-COPY ./configs/setenv.sh $CATALINA_HOME/bin
-COPY ./entrypoint.sh $CATALINA_HOME/bin
-
-RUN chmod +x $CATALINA_HOME/bin/entrypoint.sh
-
-RUN \
-  chown liferay:liferay $CATALINA_HOME/bin/entrypoint.sh \
-  && chown liferay:liferay $LIFERAY_HOME/portal-ext.properties \
-  && mkdir -p /opt/liferay \
-  && chown liferay:liferay /opt/liferay
+RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
+    && tar -C /usr/local/bin -xzvf dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
+    && rm dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz
 
 USER liferay
-VOLUME "/opt/liferay"
-ENTRYPOINT ["entrypoint.sh"]
+
+RUN \
+  cd /tmp; \
+  wget http://central.maven.org/maven2/it/dontesta/labs/liferay/portal/db/liferay-portal-database-all-in-one-support/${LIFERAY_ORACLE_DRIVER_VERSION}/liferay-portal-database-all-in-one-support-${LIFERAY_ORACLE_DRIVER_VERSION}.jar; \
+  cp liferay-portal-database-all-in-one-support-${LIFERAY_ORACLE_DRIVER_VERSION}.jar ${TOMCAT_DIR}/webapps/ROOT/WEB-INF/lib; \
+  rm liferay-portal-database-all-in-one-support-${LIFERAY_ORACLE_DRIVER_VERSION}.jar
+
+COPY ./configs/portal-ext.properties $LIFERAY_HOME/portal-ext.properties
+COPY ./configs/ojdbc8.jar ${TOMCAT_DIR}/lib/ext
+
+ENTRYPOINT dockerize -wait tcp://oracle:8080 -wait-retry-interval 60s -timeout 1000s catalina.sh run

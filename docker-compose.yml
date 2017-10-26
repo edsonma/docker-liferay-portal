@@ -1,0 +1,15 @@
+version: "3.3"
+
+services:
+  liferay-portal:
+    container_name: liferay-portal
+    build: .
+    image: amusarra/liferay-portal:7-ce-ga5-tomcat-oracle
+    ports:
+      - "9080:8080"
+      - "21311:11311"
+    depends_on:
+     - oracle
+
+  oracle:
+    image: amusarra/oracle-12c-liferay

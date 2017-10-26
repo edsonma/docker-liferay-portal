@@ -1,46 +1,16 @@
 # About this repo
 This repository contains some **nonofficial** pet-projects on how to use Liferay with Docker.
 
-# Available Liferay Releases
-  - Liferay 7.0.4 GA5
-  - Liferay 7.0.3 GA4
-  - Liferay 7.0.2 GA3
-  - Liferay 7.0.1 GA2
-  - Liferay 7.0.0 GA1
-  - Liferay 7.0.0 Beta8
-  - Liferay 7.0.0 Beta7
-  - Liferay 6.2.0 GA6
+To add support for Oracle database was used [Liferay CE 7.0 Database All In One Driver Support](https://github.com/amusarra/liferay-portal-database-all-in-one-support).
 
-# Customized Environment support
-There are some different image configurations supported under this repository, depending on if you want to use Liferay Portal with a different database or application server.
+# Usage
+To start a container from this image please run following `docker-compose` command, which will start a Liferay Portal 7 GA5 instance running on Tomcat 8.0.32, with a Oracle12c database instance running in another container:
 
-If you are using any of the CE supported databases (**MySQL or PostgreSQL**), please **use the right Git branches** on this repository to check out the docker-compose files for each database, which will provide an additional Docker container with the supported database, linked to the container running Liferay Portal. Besides, this `README.md` file will change and describe the usage for each branch.
+```bash
+$ docker-compose up -d
+```
 
-## Supported Databases
-These are the supported Database Management System (*DBMS*):
-  - HSQL
-  - MySQL
-  - PostgreSQL
-
-## Supported Application Servers
-These are the supported App servers:
-  - Tomcat
-
-## Branch name convention
-The convention for branch names, using `-` as separator, is:
-  - Liferay major version: `7`
-  - Liferay community edition: `ce`
-  - Liferay release: `ga5`
-  - Application server: `tomcat`
-  - DBMS: `hsql`
-
-So, if you are using Liferay 7 GA5 with MySQL or PostgreSQL, you should use the `7-ce-ga5-tomcat-mysql` or `7-ce-ga5-tomcat-postgres` branches, respectively.
-
-The git branches are named using the same convention, i.e.:
-
-1. https://github.com/amusarra/docker-liferay-portal/tree/7-ce-ga5-tomcat-hsql
-2. https://github.com/mdelapenya/docker-liferay-portal/tree/7-ce-ga5-tomcat-mysql
-3. https://github.com/mdelapenya/docker-liferay-portal/tree/7-ce-ga5-tomcat-postgres
+You can view output from containers following `docker-compose logs` or `docker-compose logs -f` for follow log output.
 
 # License
 These docker images are free software ("Licensed Software"); you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
