@@ -1,0 +1,10 @@
+FROM mdelapenya/liferay-portal:7-ce-ga5-tomcat-hsql
+MAINTAINER Antonio Musarra <antonio.musarra@gmail.com>
+
+COPY ./configs/portal-ext.properties $LIFERAY_CONFIG_DIR/
+COPY ./configs/*.config $LIFERAY_CONFIG_DIR/osgi/
+COPY ./configs/*.cfg $LIFERAY_CONFIG_DIR/osgi/
+COPY ./configs/*.jar $LIFERAY_HOME/osgi/modules/
+
+RUN mkdir -p /data/liferay/document_library \
+  && chown -R liferay:liferay /data
