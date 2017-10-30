@@ -10,10 +10,24 @@ https://github.com/juangon/liferay-portal/tree/7.0.4-ga5-cluster-jgroups
 portal-cache-ehcache-provider, portal-cache-ehcache
 
 # Usage
-To start a container from this image please run following `docker-compose` command, which will start a Liferay Portal 7 GA5 instance running on Tomcat 8.0.32, with a Oracle12c database instance running in another container:
+To start a container from this image please run following `docker-compose` command, which will start a Liferay Portal 7 GA5 instance running on Tomcat 8.0.32, with a PostgreSQL 10 database instance running in another container:
+
+First start:
 
 ```bash
-$ docker-compose up -d
+$ docker-compose up -d liferay-portal-node-1
+```
+
+After Liferay (on liferay-portal-node-1) is up then:
+
+```bash
+$ docker-compose up -d liferay-portal-node-2
+```
+
+If you encounter (ERROR: An HTTP request took too long to complete) this issue regularly because of slow network conditions, consider setting COMPOSE_HTTP_TIMEOUT to a higher value (current value: 60).
+
+```bash
+$ COMPOSE_HTTP_TIMEOUT=200 docker-compose up
 ```
 
 You can view output from containers following `docker-compose logs` or `docker-compose logs -f` for follow log output.

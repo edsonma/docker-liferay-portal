@@ -3,10 +3,14 @@ services:
   lb-haproxy:
     build:
       context: .
-      dockerfile: Docker-haproxy
+      dockerfile: Dockerfile-haproxy
     ports:
       - '80:80'
       - '8181:8181'
+    hostname: lb-haproxy.local
+    depends_on:
+      - liferay-portal-node-1
+      - liferay-portal-node-2
   liferay-portal-node-1:
     build:
       context: .
@@ -14,6 +18,7 @@ services:
     ports:
       - '6080:8080'
       - '21311:11311'
+    hostname: liferay-portal-node-1.local
     volumes:
       - lfr-dl-volume:/data/liferay/document_library
     depends_on:
@@ -27,10 +32,12 @@ services:
     ports:
       - '7080:8080'
       - '31311:11311'
+    hostname: liferay-portal-node-2.local
     volumes:
       - lfr-dl-volume:/data/liferay/document_library
     depends_on:
       - postgres
+      - liferay-portal-node-1
       - es-node-1
       - es-node-2
   postgres:
