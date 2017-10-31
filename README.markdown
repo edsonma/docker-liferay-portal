@@ -5,11 +5,11 @@ This repository contains a [Docker Compose](https://docs.docker.com/compose/over
 
 This Docker Compose contains this services:
 
-1. lb-haproxy: HA Proxy as Load Balancer
-2. liferay-portal-node-1: Liferay 7 GA5 (with cluster support) node 1
-3. liferay-portal-node-2: Liferay 7 GA5 (with cluster support) node 2
-4. postgres: PostgreSQL 10 database
-5. es-node-1 and es-node-2: Elasticsearch Cluster nodes
+1. **lb-haproxy**: HA Proxy as Load Balancer
+2. **liferay-portal-node-1**: Liferay 7 GA5 (with cluster support) node 1
+3. **liferay-portal-node-2**: Liferay 7 GA5 (with cluster support) node 2
+4. **postgres**: PostgreSQL 10 database
+5. **es-node-1** and **es-node-2**: Elasticsearch Cluster nodes
 
 As for the shared directory for the Liferay document library, I decided to use a shared dock volume instead of NSF.
 
@@ -20,17 +20,17 @@ For more information about Liferay Cluster you can read this [Liferay Portal Clu
 
 The configs directory contains the following items:
 
-1. Cluster OSGi Bundle
+1. **Cluster OSGi Bundle**
   * com.liferay.portal.cache.ehcache.multiple.jar
   * com.liferay.portal.cluster.multiple.jar
   * com.liferay.portal.scheduler.multiple.jar
-2. OSGi configs
+2. **OSGi configs**
   * BundleBlacklistConfiguration.config: contains the list of bundles that need not be installed
   * ElasticsearchConfiguration.config: contains elastic cluster configuration
   * AdvancedFileSystemStoreConfiguration.cfg: contains the configuration of the document library
-3. Portal properties
+3. **Portal properties**
   * portal-ext.properties: contains common configurations for Liferay, such as database connection, cluster enabling, document library, etc.
-4. HA Proxy
+4. **HA Proxy**
   * haproxy.cfg: It contains the configuration to expose an endpoint http which balances the two Liferay nodes.
 
 ## Usage
