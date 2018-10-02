@@ -47,9 +47,9 @@ services:
       - POSTGRES_USER=liferay
       - POSTGRES_DB=lportal
   es-node-1:
-    image: elasticsearch:2.4.6-alpine
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.1.4
     environment:
-      - cluster.name=elasticsearch
+      - cluster.name=docker-elasticsearch
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ulimits:
@@ -65,9 +65,9 @@ services:
     ports:
       - 9200:9200
   es-node-2:
-    image: elasticsearch:2.4.6-alpine
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.1.4
     environment:
-      - cluster.name=elasticsearch
+      - cluster.name=docker-elasticsearch
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
       - "discovery.zen.ping.unicast.hosts=es-node-1"

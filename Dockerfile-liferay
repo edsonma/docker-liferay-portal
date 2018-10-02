@@ -1,10 +1,11 @@
-FROM mdelapenya/liferay-portal:7-ce-ga5-tomcat-hsql
+FROM mdelapenya/liferay-portal:7.1-ga1
 MAINTAINER Antonio Musarra <antonio.musarra@gmail.com>
 
-COPY ./configs/portal-ext.properties $LIFERAY_CONFIG_DIR/
-COPY ./configs/*.config $LIFERAY_CONFIG_DIR/osgi/
-COPY ./configs/*.cfg $LIFERAY_CONFIG_DIR/osgi/
-COPY ./configs/*.jar $LIFERAY_HOME/osgi/modules/
+COPY ./liferay/configs/portal-ext.properties $LIFERAY_CONFIG_DIR/
+COPY ./liferay/configs/*.config $LIFERAY_CONFIG_DIR/osgi/
+COPY ./liferay/configs/*.cfg $LIFERAY_CONFIG_DIR/osgi/
+COPY ./liferay/configs/setenv.sh $CATALINA_HOME/bin/setenv.sh
+COPY ./liferay/deploy/*.jar $LIFERAY_DEPLOY_DIR/
 
 RUN mkdir -p /data/liferay/document_library \
   && chown -R liferay:liferay /data
