@@ -71,7 +71,7 @@ If you encounter (ERROR: An HTTP request took too long to complete) this issue r
 $ COMPOSE_HTTP_TIMEOUT=200 docker-compose up -d
 ```
 
-### Check Liferay and Elastich services
+### Check Liferay and Elasticsearch services
 To check the successful installation of cluster bundles, you can connect to the Gogo Shell of each node (via telnet) and run the command:
 
 The telnet ports of the GogoShell exposed by the two nodes are respectively: 21311 and 31311
